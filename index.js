@@ -4,7 +4,7 @@ const graphql = require('graphql');
 const ExpressGraphQL = require('express-graphql');
 
 const app = express();
-const db = new sqlite3.Database('./my.db');
+const database = new sqlite3.Database('./my.db');
 
 // Creating Contact table in SQLite3 db
 const createContactTable = () => {
@@ -66,6 +66,101 @@ let queryType = new graphql.GraphQLObjectType({
                         resolve(rows[0]);
                     });
                 });
+            }
+        }
+    }
+});
+
+// Defining the basic CRUD operations for GraphQL
+let mutationType = new graphql.GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        createContact: {
+            type: ContactType,
+            args: {
+                firstName: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                lastName: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                email: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                }
+            },
+            resolve: (root, {
+                firstName,
+                lastName,
+                email
+            }) => {
+                return new Promise((resolve, reject) => {
+                    database.run('INSERT INTO contacts (firstName, lastName, email) VALUES (?,?,?);', [firstName, lastName, email], (err) => {
+                        if (err) {
+                            reject(null);
+                        }
+                        database.get('SELECT last_insert_rowid() as id', (err, row) => {
+
+                            resolve({
+                                id: row['id'],
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email
+                            });
+                        });
+                    });
+                })
+            }   
+        },
+        updateContact: {
+            type: graphql.GraphQLString,
+            args: {
+                id: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+                },
+                firstName: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                lastName: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                email: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+            },
+            resolve: (root, {
+                id,
+                firstName,
+                lastName,
+                email
+            }) => {
+                return new Promise((resolve, reject) => {
+                    database.run('UPDATE contacts SET firstName = (?), lastname = (?), email = (?) WHERE id = (?);', [firstName, lastName, email, id], (err) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve(`Contact #${id} updated`);
+                    });
+                })
+            }
+        },
+        deleteContact: {
+            type: graphql.GraphQLString,
+            args: {
+                id: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+                }
+            },
+            resolve: (root, {
+                id
+            }) => {
+                return new Promise((resolve, reject) => {
+                    database.run('DELETE from contacts WHERE id = (?);', [id], (err) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve(`Contact #${id} deleted`);
+                    });
+                })
             }
         }
     }
