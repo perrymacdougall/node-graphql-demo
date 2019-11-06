@@ -5,3 +5,26 @@ const ExpressGraphQL = require('express-graphql');
 
 const app = express();
 const db = new sqlite3.Database('./my.db');
+
+// Creating Contact table in SQLite3 db
+const createContactTable = () => {
+    const query = `
+    CREATE TABLE IF NOT EXISTS contacts (
+        id integer PRIMARY KEY,
+        firstName text,
+        lastName text,
+        email text UNIQUE)`;
+    return database.run(query);
+}
+createContactTable();
+
+// Creating a custom GraphQL type that corresponds to a contact in the db
+const ContactType = new graphql.GraphQLObjectType({
+    name: "Contact",
+    fields: {
+        id: { type: graphql.GraphQLID },
+        firstName: { type: graphql.GraphQLString },
+        lastName: { type: graphql.GraphQLString },
+        email: { type: graphql.GraphQLString }
+    }
+});
