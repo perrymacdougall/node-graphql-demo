@@ -28,3 +28,45 @@ const ContactType = new graphql.GraphQLObjectType({
         email: { type: graphql.GraphQLString }
     }
 });
+
+// Creating a custom GraphQL query for fetching data from the db
+let queryType = new graphql.GraphQLObjectType({
+    name: 'Query',
+    fields: {
+        contacts: {
+            type: graphql.GraphQLList(ContactType),
+            resolve: (root, args, context, info) => {
+                return new Promise((resolve, reject) => {
+
+                    database.all("SELECT * FROM contacts;", function (err, rows) {
+                        if (err) {
+                            reject([]);
+                        }
+                        resolve(rows);
+                    });
+                });
+            }
+        },
+        contact: {
+            type: ContactType,
+            args: {
+                id: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+                }
+            },
+            resolve: (root, {
+                id
+            }, context, info) => {
+                return new Promise((resolve, reject) => {
+
+                    database.all("SELECT * FROM contacts WHERE id = (?);", [id], function(err, rows) {
+                        if (err) {
+                            reject(null);
+                        }
+                        resolve(rows[0]);
+                    });
+                });
+            }
+        }
+    }
+});
