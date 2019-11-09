@@ -2,8 +2,10 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const graphql = require('graphql');
 const ExpressGraphQL = require('express-graphql');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const database = new sqlite3.Database('./my.db');
 
 // Creating Contact table in SQLite3 db
