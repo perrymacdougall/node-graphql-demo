@@ -8,7 +8,7 @@
         <th>Actions</th>
       </tr>
 
-      <tr v-for='contact in contacts'>
+      <tr v-for='contact in contacts' v-bind:key='contact.id'>
         <td>{{ contact.firstName }}</td>
         <td>{{ contact.lastName }}</td>
         <td>{{ contact.email }}</td>
@@ -17,24 +17,26 @@
           <input type="button" @click="deleteContact(contact.id)" value="Delete">
         </td>
       </tr>
-      </br>
-        <form>
-          <label>First Name</label>
-          <input type="text" name="firstName" v-model="firstName">
-          </br>
+    </table>
 
-          <label>Last Name</label>
-          <input type="text" name="lastName" v-model="lastName">
-          </br>
+    <br />
+      <form>
+        <label>First Name</label>
+        <input type="text" name="firstName" v-model="firstName">
+        <br />
 
-          <label>Email</label>
-          <input type="email" name="email" v-model="email">
-          </br>
+        <label>Last Name</label>
+        <input type="text" name="lastName" v-model="lastName">
+        <br />
 
-          <input v-if="!id" type="button" @click="createContact(firstName, lastName, email)" value="Add">
-          <input v-if="id" type="button" @click="updateContact(id, firstName, lastName, email)" value="Update">
-          <input type="button" @click="clearForm()" value="Clear">
-        </form>
+        <label>Email</label>
+        <input type="email" name="email" v-model="email">
+        <br />
+
+        <input v-if="!id" type="button" @click="createContact(firstName, lastName, email)" value="Add">
+        <input v-if="id" type="button" @click="updateContact(id, firstName, lastName, email)" value="Update">
+        <input type="button" @click="clearForm()" value="Clear">
+      </form>
   </div>
 </template>
 
@@ -43,6 +45,14 @@ import gql from 'graphql-tag'
 
 export default {
   name: 'app',
+  // Initializing variables
+  data(){
+    return {
+      id: null,
+      firstName: '',
+      lastName: '',
+      email: ''}
+  },
   // Creating an apollo object to receive query for displaying data in template
   apollo: {
     contacts: gql`query {
@@ -57,7 +67,7 @@ export default {
   methods: {
     // Using this.$apollo.mutate to send mutations to the GraphQL server
     createContact(firstName, lastName, email){
-      console.log(`Create contact: ${email}`)
+      // console.log(`Create contact: ${email}`)
       this.$apollo.mutate({
         mutation: gql`mutation createContact($firstName: String!, $lastName: String!, $email: String!){
           createContact(firstName: $firstName, lastName: $lastName, email: $email) {
@@ -75,7 +85,7 @@ export default {
       location.reload();
     },
     updateContact(id, firstName, lastName, email){
-      console.log(`Update contact: # ${id}`)
+      // console.log(`Update contact: # ${id}`)
       this.$apollo.mutate({
         mutation: gql`mutation updateContact($id: ID!, $firstName: String!, $lastName: String!, $email: String!){
           updateContact(id: $id, firstName: $firstName, lastName: $lastName, email: $email)
@@ -90,7 +100,7 @@ export default {
       location.reload();
     },
     deleteContact(id){
-      console.log(`Delete contact: # ${id}`)
+      // console.log(`Delete contact: # ${id}`)
       this.$apollo.mutate({
         mutation: gql`mutation deleteContact($id: ID!){
           deleteContact(id: $id)
