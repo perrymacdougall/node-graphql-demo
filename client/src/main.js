@@ -8,16 +8,17 @@ const apolloClient = new ApolloClient({
   uri: 'http://localhost:4000/graphql'
 })
 
+// Using the VueApollo plugin to integrate Apollo with the Vue application
+Vue.use(VueApollo)
+
+// Creating an Apollo Provider to make the Apollo instance available to all components
+const apolloProvider = new VueApollo({
+  defaultClient: apolloClient
+})
+
 Vue.config.productionTip = false
 
 new Vue({
   render: h => h(App),
   apolloProvider
 }).$mount('#app')
-
-// Using the VueApollo plugin to integrate Apollo with the Vue application
-Vue.use(VueApollo)
-// Creating an Apollo Provider to make the Apollo instance available to all components
-const apolloProvider = new VueApollo({
-  defaultClient: apolloClient
-})
